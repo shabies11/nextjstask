@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+body {
+  overflow-x: hidden;
+  color: rgb(var(--foreground-rgb));
+  background:  #111828;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+.input-style{
+  @apply border-none  bg-[#384152] flex h-10 w-full border-none    text-white shadow-input rounded-md px-3 py-2 text-sm  file:border-0 file:bg-transparent 
+  file:text-sm file:font-medium placeholder:text-neutral-400  
+  focus-visible:outline-none focus-visible:ring-[2px]  focus-visible:ring-neutral-400  focus-visible:ring-neutral-600
+   disabled:cursor-not-allowed disabled:opacity-50
+    shadow-[0px_0px_1px_1px_var(--neutral-700)]
+   group-hover/input:shadow-none transition
+}
+.truncate-title {
+  white-space: nowrap;      /* Prevents text from wrapping */
+  overflow: hidden;         /* Hides overflow text */
+  text-overflow: ellipsis;  /* Adds ellipsis for overflow text */
+}
+.cart-title{
+  font-size: 18px;
+  font-weight: 700;
+}
+.cart-subtotal{
+  font-size: 16px;
+  font-weight: 600;
+}
+.item-counter button{
+  background-color: #F3F4F6;
+  width: 40px;
+  height: 40px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.item-counter button:first-child{
+  border-right:1px solid #676464bd;
+
+}
+.item-counter button:last-child{
+  border-left:1px solid #676464bd;
+
+
+  }
+  .item-counter span{
+    display: inline-block;
+    width: 40px;
+    text-align: center;
+  }
+  .item-counter{
+  border-radius: 5px;
+  overflow: hidden;
+  border:1px solid #676464bd;
+
+ 
+}
