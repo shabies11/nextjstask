@@ -8,6 +8,8 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 
 export function SignupForm() {
+
+  
   const [data, setData] = useState<{ [key: string]: any }>({});
   const router = useRouter();
 
@@ -28,7 +30,7 @@ export function SignupForm() {
     try {
 
 
-      let url = '/api/user';
+      let url = '/api/register';
       let userInfo = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

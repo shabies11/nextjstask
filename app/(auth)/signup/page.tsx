@@ -5,6 +5,14 @@ import React from 'react'
 
 function page() {
     return (
+        <>
+        <style>
+                {`
+                        .menu-items {
+                            display: none !important;
+                        } 
+                    `}
+            </style>
         <div className='min-h-screen py-4 w-full overflow-hidden flex items-center'>
             <div className="">
                 <Spotlight className='-top-40 -left-10 md:-left-32 md:-top-20 h-screen' fill="white" />
@@ -13,6 +21,7 @@ function page() {
             </div>
             <SignupForm />
         </div>
+        </>
     )
 }
 

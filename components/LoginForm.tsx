@@ -6,12 +6,16 @@ import '../app/globals.css';
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import { toast } from "react-toastify"; 
+import { useDispatch } from "react-redux";
+import { setUser } from "@/providers/slice/User";
 export function LoginForm() { 
-
+  const dispatch = useDispatch();
   const [data, setData] = useState<{ [key: string]: any }>({});
   const router = useRouter();
-
+// loading 
   const [loading, setLoading] = useState(false);
+
+  // handle input change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setData((prev) => {
@@ -21,6 +25,8 @@ export function LoginForm() {
       };
     });
   }; 
+
+// handle form submission
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     try{
@@ -41,12 +47,13 @@ export function LoginForm() {
         body: JSON.stringify(data),
       })
       let result = await response.json();
-       if(result.status == false){
+       if(result.success == false){
         toast.error(result.message)
         return;
       }
-      if (response.ok) {
+      if (result.success == true) {
         toast.success(result.message)
+        dispatch(setUser(result.user));
 
         router.push('/')
       } else {

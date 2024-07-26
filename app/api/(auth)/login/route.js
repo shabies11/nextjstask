@@ -10,7 +10,7 @@ export async function POST(request, res) {
     const payload = await request.json();
 
     const { email, password } = payload;
-    console.log(payload);
+ 
     //check user
     const validUser = await user.findOne({ email: email });
     if (!validUser) {
@@ -36,12 +36,15 @@ export async function POST(request, res) {
     var token = jwt.sign({ _id: validUser._id }, process.env.HASH_TOKEN, {
       expiresIn: "1D",
     });
+    validUser.password = '';
     const response = NextResponse.json({
       message: "User logged in successfully",
       status: 200,
       success: true,
+      user:validUser
     });
     response.cookies.set("loginToken", token);
+    
     return response;
   } catch (err) {
     return NextResponse.json({

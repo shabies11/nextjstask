@@ -1,70 +1,138 @@
 "use client"
-import React, { useState } from 'react'
+import { addToCart, decrementQuantity, incrementQuantity, removeFromCart } from '@/providers/slice/CartSlice';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+
+interface CartItem {
+    id: string;
+    title: string;
+    price: number;
+    quantity: number;
+    image: string;
+}
 
 const Cart = () => {
-    const [count, setCount] = useState(1);
+    const items = useSelector((state: any) => state.cart.items) as CartItem[];
+    const dispatch = useDispatch();
+    const router = useRouter();
+
+    const [counts, setCounts] = useState<{ [key: string]: number }>(() => {
+        const initialCounts: { [key: string]: number } = {};
+        items.forEach(item => {
+            initialCounts[item.id] = item.quantity;
+        });
+        return initialCounts;
+    });
+
+    const calculateTotal = (items: CartItem[]) => {
+        if (items.length === 0) {
+            return {
+                subtotal: 0,
+                shipping: 4.99,
+                total: "NA"
+            };
+        }
+
+        const subtotal = items.reduce((acc: number, item: CartItem) => acc + (item.price * counts[item.id]), 0);
+        const shipping = 4.99; // Fixed shipping cost
+        const total = subtotal + shipping;
+
+        return {
+            subtotal,
+            shipping,
+            total: total.toFixed(2) + " USD"
+        };
+    };
+
+    const { subtotal, shipping, total } = calculateTotal(items);
+
+    const paynow = () => {
+        router.push('/checkout');
+    };
+
+    const removeItem = (id: string) => {
+        dispatch(removeFromCart(id));
+        // Remove the count for the removed item
+        setCounts(prevCounts => {
+            const newCounts = { ...prevCounts };
+            delete newCounts[id];
+            return newCounts;
+        });
+    };
+
+    const updateQuantity = (id: string, newCount: number,action:string) => {
+        setCounts(prevCounts => ({
+            ...prevCounts,
+            [id]: newCount,
+        }));
+        if(action === 'add') {
+         
+        dispatch(incrementQuantity(id));
+        }else{
+        dispatch(decrementQuantity(id));
+    }
+    };
+
     return (
-
-
         <div className='mx-auto max-w-7xl px-2 sm:px-6 lg:px-8 py-16'>
-
-            <h2 className="text-lg font-semibold mb-4 ">Cart Items</h2>
-
+            <h2 className="text-lg font-semibold mb-4">Cart Items</h2>
             <div className="grid grid-cols-12 gap-4">
-                <div className="col-span-8">
-                    <div className="bg-white text-[#000] p-4 rounded-lg shadow-md mb-4">
-                        <div className="flex items-start justify-between mb-2">
-                            <div className="flex items-start">
-                                <img src="https://placehold.co/100x100" alt="Modern Ergonomic Office Chair" className="mr-4 rounded" />
-                                <div>
-                                    <h3 className="text-md font-medium cart-title">Modern Ergonomic Office Chair</h3>
-                                    <span className="text-muted-foreground cart-subtotal">Subtotal: $71.00</span>
+                <div className="md:col-span-8 col-span-12">
+                    {items.length > 0 ? items.map((item: CartItem) => (
+                        <div key={item.id} className="bg-white text-[#000] p-4 rounded-lg shadow-md mb-4">
+                            <div className="flex items-start justify-between lg:flex-row flex-col mb-2">
+                                <div className="flex items-start">
+                                    <Image src={item.image} height={100} width={100} alt={item.title} className="mr-4 rounded" />
+                                    <div>
+                                        <h3 className="text-md font-medium cart-title max-w-[24rem]">{item.title}</h3>
+                                        <span className="text-muted-foreground cart-subtotal">
+                                            Subtotal: ${item.price} <strong>X</strong> {counts[item.id]} <strong>=</strong> ${(item.price * counts[item.id]).toFixed(2)}
+                                        </span>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="flex items-center">
-                                <div className="item-counter">
-
-                                    <button className="bg-secondary text-secondary-foreground p-1 " onClick={() => {
-                                        if (count > 1) {
-                                            setCount(count - 1)
-                                        }
-                                    }}>-</button>
-                                    <span className="mx-2" >{count}</span>
-                                    <button className="bg-secondary text-secondary-foreground p-1 " onClick={() => {
-                                        setCount(count + 1)
-                                    }}>+</button>
+                                <div className="flex items-center ms-auto">
+                                    <div className="item-counter">
+                                        <button className="bg-secondary text-secondary-foreground p-1" onClick={() => {
+                                            if (counts[item.id] > 1) {
+                                                updateQuantity(item.id, counts[item.id] - 1,'remove');
+                                            }
+                                        }}>-</button>
+                                        <span className="mx-2">{counts[item.id]}</span>
+                                        <button className="bg-secondary text-secondary-foreground p-1" onClick={() => {
+                                            updateQuantity(item.id, counts[item.id] + 1,'add');
+                                        }}>+</button>
+                                    </div>
+                                    <button className="bg-destructive text-destructive-foreground p-1 ml-2" onClick={() => removeItem(item.id)}>X</button>
                                 </div>
-                                <button className="bg-destructive text-destructive-foreground p-1  ml-2">X</button>
                             </div>
                         </div>
-                    </div>
-
-
+                    )) : <h2 className='text-2xl text-center'>No Item Found.</h2>}
                 </div>
 
-                <div className="col-span-4 bg-white text-[#000] p-4 rounded-lg shadow-md">
-                    <div className="flex justify-between mb-2">
-                        <span>Subtotal</span>
-                        <span>$110.00</span>
+                <div className="md:col-span-4 col-span-12">
+                    <div className="bg-white text-[#000] p-4 rounded-lg shadow-md">
+                        <div className="flex justify-between mb-2">
+                            <span>Subtotal</span>
+                            <span>{subtotal > 0 ? `$${subtotal.toFixed(2)}` : "NA"}</span>
+                        </div>
+                        <div className="flex justify-between mb-2">
+                            <span>Shipping</span>
+                            <span>$4.99</span>
+                        </div>
+                        <div className="flex justify-between font-semibold">
+                            <span>Total</span>
+                            <span>{total}</span>
+                        </div>
+                        <span className="text-muted-foreground">including VAT</span>
+
+                        <button onClick={paynow} className={`mt-4 w-full bg-blue text-primary-foreground p-2 rounded-full px-12 py-4 r bg-[#2d73ecbb] font-bold text-white tracking-widest shadow-md uppercase transform hover:scale-105 hover:bg-[#fff] hover:text-[#000] transition-colors duration-400 lg:text-xl text-[14px] ${items.length === 0 ? 'cursor-not-allowed' : ''}`} disabled={items.length === 0}>Check out</button>
                     </div>
-                    <div className="flex justify-between mb-2">
-                        <span>Shipping</span>
-                        <span>$4.99</span>
-                    </div>
-                    <div className="flex justify-between font-semibold">
-                        <span>Total</span>
-                        <span>$114.99 USD</span>
-                    </div>
-                    <span className="text-muted-foreground">including VAT</span>
-                    
-                    <button className="mt-4 w-full bg-blue text-primary-foreground p-2 rounded px-12 py-4 rounded-full bg-[#2d73ecbb] font-bold text-white tracking-widest shadow-md uppercase transform hover:scale-105 hover:bg-[#fff] hover:text-[#000] transition-colors duration-400">Check out</button>
-                    
-                     
                 </div>
             </div>
         </div>
-
-    )
+    );
 }
 
-export default Cart
+export default Cart;
