@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-
+import { toast } from 'react-toastify';
 interface CartItem {
     id: string;
     title: string;
@@ -15,9 +15,11 @@ interface CartItem {
 
 const Cart = () => {
     const items = useSelector((state: any) => state.cart.items) as CartItem[];
+    const user = useSelector((state: any) => state.user);
+    console.log(user);
     const dispatch = useDispatch();
     const router = useRouter();
-
+    const [loading, setLoading] = useState(false);
     const [counts, setCounts] = useState<{ [key: string]: number }>(() => {
         const initialCounts: { [key: string]: number } = {};
         items.forEach(item => {
@@ -30,7 +32,7 @@ const Cart = () => {
         if (items.length === 0) {
             return {
                 subtotal: 0,
-                shipping: 4.99,
+                shipping: 'NA',
                 total: "NA"
             };
         }
@@ -38,18 +40,50 @@ const Cart = () => {
         const subtotal = items.reduce((acc: number, item: CartItem) => acc + (item.price * counts[item.id]), 0);
         const shipping = 4.99; // Fixed shipping cost
         const total = subtotal + shipping;
+        const totalPayable = subtotal + shipping;
 
         return {
             subtotal,
             shipping,
+            totalPayable,
             total: total.toFixed(2) + " USD"
         };
     };
 
-    const { subtotal, shipping, total } = calculateTotal(items);
+    const { subtotal, shipping, total, totalPayable } = calculateTotal(items);
 
-    const paynow = () => {
-        router.push('/checkout');
+    const paynow = async () => {
+        try {
+            setLoading(true)
+            let data = {
+                name: 'user name',
+                product: 'cart product',
+                totalprice: totalPayable !== undefined ? Math.round(totalPayable) : 0,
+
+            };
+            // the error was comming,  so i convert this to integer
+            let req = await fetch('/api/payment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
+            let response = await req.json();
+            if (response.success) {
+
+                window.location.href = response.message.url;
+            } else {
+                toast.error('Payment failed. Please try again later.');
+            }
+
+
+
+        } catch (error) {
+            console.error('Error in payment processing:', error);
+            toast.error('Payment processing failed. Please try again later.');
+
+        }finally{
+            setLoading(false);
+        }
     };
 
     const removeItem = (id: string) => {
@@ -62,17 +96,17 @@ const Cart = () => {
         });
     };
 
-    const updateQuantity = (id: string, newCount: number,action:string) => {
+    const updateQuantity = (id: string, newCount: number, action: string) => {
         setCounts(prevCounts => ({
             ...prevCounts,
             [id]: newCount,
         }));
-        if(action === 'add') {
-         
-        dispatch(incrementQuantity(id));
-        }else{
-        dispatch(decrementQuantity(id));
-    }
+        if (action === 'add') {
+
+            dispatch(incrementQuantity(id));
+        } else {
+            dispatch(decrementQuantity(id));
+        }
     };
 
     return (
@@ -96,12 +130,12 @@ const Cart = () => {
                                     <div className="item-counter">
                                         <button className="bg-secondary text-secondary-foreground p-1" onClick={() => {
                                             if (counts[item.id] > 1) {
-                                                updateQuantity(item.id, counts[item.id] - 1,'remove');
+                                                updateQuantity(item.id, counts[item.id] - 1, 'remove');
                                             }
                                         }}>-</button>
                                         <span className="mx-2">{counts[item.id]}</span>
                                         <button className="bg-secondary text-secondary-foreground p-1" onClick={() => {
-                                            updateQuantity(item.id, counts[item.id] + 1,'add');
+                                            updateQuantity(item.id, counts[item.id] + 1, 'add');
                                         }}>+</button>
                                     </div>
                                     <button className="bg-destructive text-destructive-foreground p-1 ml-2" onClick={() => removeItem(item.id)}>X</button>
@@ -127,7 +161,7 @@ const Cart = () => {
                         </div>
                         <span className="text-muted-foreground">including VAT</span>
 
-                        <button onClick={paynow} className={`mt-4 w-full bg-blue text-primary-foreground p-2 rounded-full px-12 py-4 r bg-[#2d73ecbb] font-bold text-white tracking-widest shadow-md uppercase transform hover:scale-105 hover:bg-[#fff] hover:text-[#000] transition-colors duration-400 lg:text-xl text-[14px] ${items.length === 0 ? 'cursor-not-allowed' : ''}`} disabled={items.length === 0}>Check out</button>
+                        <button onClick={paynow} className={`mt-4 w-full bg-blue text-primary-foreground p-2 rounded-full px-12 py-4 r bg-[#2d73ecbb] font-bold text-white tracking-widest shadow-md uppercase transform hover:scale-105 hover:bg-[#fff] hover:text-[#000] transition-colors duration-400 lg:text-xl text-[14px] ${items.length === 0 ? 'cursor-not-allowed' : ''}`} disabled={items.length === 0}>{loading?"Processing...":'Check out'}</button>
                     </div>
                 </div>
             </div>

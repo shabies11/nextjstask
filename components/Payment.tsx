@@ -1,5 +1,4 @@
 'use client'
-import Image from 'next/image';
 import React, { useState } from 'react'
 import { useSelector } from 'react-redux';
 
@@ -35,7 +34,7 @@ const Payment = () => {
                     <p className="text-lg mt-2"><strong>Total: </strong> ${total}</p>
                     <p className="text-md text-muted-foreground">Order from Ecommerce</p>
                     <div className="mt-4">
-                        <Image aria-hidden="true" alt="payment illustration" src="https://openui.fly.dev/openui/300x300.svg?text=Illustration" />
+                        <img aria-hidden="true" alt="payment illustration" src="https://openui.fly.dev/openui/300x300.svg?text=Illustration" />
                     </div>
                     <p className="text-xs text-muted-foreground mt-4">Powered by Stripe</p>
                     <p className="text-xs text-muted-foreground">Terms | Privacy</p>

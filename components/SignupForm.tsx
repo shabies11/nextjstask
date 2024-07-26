@@ -41,16 +41,16 @@ export function SignupForm() {
 
       if (response.status == true) {
 
-        alertMessage(response.message, 'success')
+        toast.success(response.message);
         router.push('/login')
       } else {
 
-        alertMessage(response.message, 'error')
+        toast.error(response.message)
       }
 
     } catch (error) {
 
-      alertMessage('something went wrong', 'error')
+      toast.error('something went wrong')
     } finally {
       setLoading(false);
       return;
@@ -58,36 +58,7 @@ export function SignupForm() {
 
   };
 
-
-
-  function alertMessage(message: string, type: string) {
-    if (type == "success") {
-      toast.success(message, {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
-
-      });
-
-    } else if (type == "error") {
-      toast.error(message, {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
-
-      });
-    }
-  }
+ 
   return (
     <div className="max-w-md w-full mx-auto rounded-none   md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-[#202938]">
       <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200">
@@ -110,7 +81,7 @@ export function SignupForm() {
         </div>
         <LabelInputContainer className="mb-4">
           <Label htmlFor="email">Email Address</Label>
-          <input name="email" id="email" placeholder="projectmayhem@fc.com" className="input-style" type="email" onChange={handleChange} required />
+          <input name="email" id="email" placeholder="email@gmail.com" className="input-style" type="email" onChange={handleChange} required />
         </LabelInputContainer>
         <LabelInputContainer className="mb-4">
           <Label htmlFor="password">Password</Label>

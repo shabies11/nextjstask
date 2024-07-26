@@ -81,7 +81,7 @@ export function LoginForm() {
 
         <LabelInputContainer className="mb-6">
           <Label htmlFor="email">Email Address</Label>
-          <input id="email" name="email" placeholder="projectmayhem@fc.com" onChange={handleChange} className="input-style" type="email" />
+          <input id="email" name="email" placeholder="email@gmail.com" onChange={handleChange} className="input-style" type="email" />
         </LabelInputContainer>
         <LabelInputContainer className="mb-6">
           <Label htmlFor="password">Password</Label>
